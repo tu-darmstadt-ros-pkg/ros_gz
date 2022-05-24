@@ -95,15 +95,41 @@ int main(int argc, char * argv[])
   const size_t queue_size = 10;
   for (auto i = 1; i < argc; ++i)
   {
+    std::string ros_topic;
+    std::string ign_topic;
+    bool different_topics = false;
+    
     std::string arg = std::string(argv[i]);
+  
+    // this works only for char delimiters
+    int count = std::count(arg.begin(), arg.end(), delim.c_str()[0]);
+
+    if (count == 3) {
+      different_topics = true;
+    }
+
     auto delimPos = arg.find(delim);
     if (delimPos == std::string::npos || delimPos == 0)
     {
      usage();
      return -1;
     }
-    std::string topic_name = arg.substr(0, delimPos);
+    ros_topic = arg.substr(0, delimPos);
     arg.erase(0, delimPos + delim.size());
+
+    if (different_topics) {
+      delimPos = arg.find(delim);
+      if (delimPos == std::string::npos || delimPos == 0)
+      {
+        usage();
+        return -1;
+      }
+      ign_topic = arg.substr(0, delimPos);
+      arg.erase(0, delimPos + delim.size());
+    }
+    else {
+      ign_topic = ros_topic;
+    }
 
     // Get the direction delimeter, which should be one of:
     //   @ == bidirectional, or
@@ -153,28 +179,28 @@ int main(int argc, char * argv[])
               ros_ign_bridge::create_bidirectional_bridge(
                 ros_node, ign_node,
                 ros_type_name, ign_type_name,
-                topic_name, queue_size));
+                ros_topic, ign_topic, queue_size));
           break;
         case FROM_IGN_TO_ROS:
           ign_to_ros_handles.push_back(
               ros_ign_bridge::create_bridge_from_ign_to_ros(
                 ign_node, ros_node,
-                ign_type_name, topic_name, queue_size,
-                ros_type_name, topic_name, queue_size));
+                ign_type_name, ign_topic, queue_size,
+                ros_type_name, ros_topic, queue_size));
           break;
         case FROM_ROS_TO_IGN:
           ros_to_ign_handles.push_back(
               ros_ign_bridge::create_bridge_from_ros_to_ign(
                 ros_node, ign_node,
-                ros_type_name, topic_name, queue_size,
-                ign_type_name, topic_name, queue_size));
+                ros_type_name, ros_topic, queue_size,
+                ign_type_name, ign_topic, queue_size));
           break;
       }
     }
     catch (std::runtime_error &_e)
     {
-      ROS_ERROR_STREAM("Failed to create a bridge for topic ["
-          << topic_name << "] "
+      ROS_ERROR_STREAM("Failed to create a bridge for topics ["
+          << ros_topic << " " << ign_topic << "] "
           << "with ROS type [" << ros_type_name << "] and "
           << "Ignition Transport type [" << ign_type_name << "]"
           << std::endl);

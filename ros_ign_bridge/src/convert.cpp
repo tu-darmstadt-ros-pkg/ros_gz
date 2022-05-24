@@ -55,7 +55,22 @@ std::string replace_delimiter(const std::string &input,
 
 std::string frame_id_ign_to_ros(const std::string &frame_id)
 {
-  return replace_delimiter(frame_id, "::", "/");
+  //reducing topic to last frame, not handling tf prefixes right now
+  std::string frame = frame_id;
+  std::string delimiter = "::";
+  while(std::count(frame.begin(), frame.end(), delimiter.c_str()[0]) > 0) {
+    std::cout << "removing delimiter" << std::endl;
+    frame.erase(0, frame.find(delimiter) + delimiter.length()); 
+  }
+  std::string robot_prefix = ""; //TODO
+  frame = robot_prefix + "/" + frame;
+  return frame;
+  //return replace_delimiter(frame_id, "::", "/");
+}
+
+//TODO, in this case a mapping from robot prefix + frame to frame is needed. Maybe create this on subscribe? by passing robot prefix?
+std::string frame_id_ros_to_ign(const std::string &frame_id) {
+  return frame_id;
 }
 
 template<>
@@ -183,7 +198,7 @@ convert_ros_to_ign(
   newPair->add_value(std::to_string(ros_msg.seq));
   newPair = ign_msg.add_data();
   newPair->set_key("frame_id");
-  newPair->add_value(ros_msg.frame_id);
+  newPair->add_value(frame_id_ros_to_ign(ros_msg.frame_id));
 }
 
 template<>
@@ -425,7 +440,7 @@ convert_ros_to_ign(
 
   auto newPair = ign_msg.mutable_header()->add_data();
   newPair->set_key("child_frame_id");
-  newPair->add_value(ros_msg.child_frame_id);
+  newPair->add_value(frame_id_ros_to_ign(ros_msg.child_frame_id));
 }
 
 template<>
@@ -592,7 +607,7 @@ convert_ros_to_ign(
 
   auto childFrame = ign_msg.mutable_header()->add_data();
   childFrame->set_key("child_frame_id");
-  childFrame->add_value(ros_msg.child_frame_id);
+  childFrame->add_value(frame_id_ros_to_ign(ros_msg.child_frame_id));
 }
 
 template<>
@@ -956,7 +971,7 @@ convert_ros_to_ign(
   convert_ros_to_ign(ros_msg.header, (*ign_msg.mutable_header()));
 
   // ToDo: Verify that this is the expected value (probably not).
-  ign_msg.set_entity_name(ros_msg.header.frame_id);
+  ign_msg.set_entity_name(frame_id_ros_to_ign(ros_msg.header.frame_id));
 
   if (!ignition::math::equal(ros_msg.orientation_covariance[0], -1.0))
   {
@@ -1057,7 +1072,7 @@ convert_ros_to_ign(
     (ros_msg.angle_max - ros_msg.angle_min) / ros_msg.angle_increment;
 
   convert_ros_to_ign(ros_msg.header, (*ign_msg.mutable_header()));
-  ign_msg.set_frame(ros_msg.header.frame_id);
+  ign_msg.set_frame(frame_id_ros_to_ign(ros_msg.header.frame_id));
   ign_msg.set_angle_min(ros_msg.angle_min);
   ign_msg.set_angle_max(ros_msg.angle_max);
   ign_msg.set_angle_step(ros_msg.angle_increment);

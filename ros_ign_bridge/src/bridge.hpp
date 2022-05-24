@@ -102,20 +102,21 @@ create_bidirectional_bridge(
   std::shared_ptr<ignition::transport::Node> ign_node,
   const std::string & ros_type_name,
   const std::string & ign_type_name,
-  const std::string & topic_name,
+  const std::string & ros_topic_name,
+  const std::string & ign_topic_name,
   size_t queue_size = 10)
 {
-  ROS_DEBUG_STREAM("Creating bidirectional bridge for topic" << topic_name
+  ROS_DEBUG_STREAM("Creating bidirectional bridge for topics " << ros_topic_name << " " << ign_topic_name
       << " with ROS type [" << ros_type_name << "] and Ignition Transport"
       << " type [" << ign_type_name << "]");
 
   BridgeHandles handles;
   handles.bridgeRosToIgn = create_bridge_from_ros_to_ign(
    ros_node, ign_node,
-   ros_type_name, topic_name, queue_size, ign_type_name, topic_name, queue_size);
+   ros_type_name, ros_topic_name, queue_size, ign_type_name, ign_topic_name, queue_size);
   handles.bridgeIgnToRos = create_bridge_from_ign_to_ros(
     ign_node, ros_node,
-    ign_type_name, topic_name, queue_size, ros_type_name, topic_name, queue_size);
+    ign_type_name, ign_topic_name, queue_size, ros_type_name, ros_topic_name, queue_size);
   return handles;
 }
 
