@@ -70,28 +70,16 @@ void usage()
       << ".StringMsg" << std::endl);
 }
 
-//////////////////////////////////////////////////
-int main(int argc, char * argv[])
-{
-  if (argc < 2)
-  {
-    usage();
-    return -1;
-  }
-
-  // ROS node
-  ros::init(argc, argv, "ros_ign_bridge");
-  ros::NodeHandle ros_node;
-
-  // Ignition node
-  auto ign_node = std::make_shared<ignition::transport::Node>();
-
-  std::list<ros_ign_bridge::BridgeHandles> bidirectional_handles;
-  std::list<ros_ign_bridge::BridgeIgnToRosHandles> ign_to_ros_handles;
-  std::list<ros_ign_bridge::BridgeRosToIgnHandles> ros_to_ign_handles;
-
-  // Parse all arguments.
+int parseArguments(int argc, char * argv[], 
+  std::list<ros_ign_bridge::BridgeHandles>& bidirectional_handles, 
+  std::list<ros_ign_bridge::BridgeIgnToRosHandles>& ign_to_ros_handles,
+  std::list<ros_ign_bridge::BridgeRosToIgnHandles>& ros_to_ign_handles,
+  std::shared_ptr<ignition::transport::Node> ign_node,
+  ros::NodeHandle& ros_node) {
+// Parse all arguments.
   const std::string delim = "@";
+  const std::string delim2 = "[";
+  const std::string delim3 = "]";
   const size_t queue_size = 10;
   for (auto i = 1; i < argc; ++i)
   {
@@ -103,6 +91,8 @@ int main(int argc, char * argv[])
   
     // this works only for char delimiters
     int count = std::count(arg.begin(), arg.end(), delim.c_str()[0]);
+    count += std::count(arg.begin(), arg.end(), delim2.c_str()[0]);
+    count += std::count(arg.begin(), arg.end(), delim3.c_str()[0]);
 
     if (count == 3) {
       different_topics = true;
@@ -206,6 +196,204 @@ int main(int argc, char * argv[])
           << std::endl);
     }
   }
+  return 0;
+}
+
+int parseParameters(bool topics_available, bool frame_available,
+  ros::NodeHandle& nh_private,
+  std::list<ros_ign_bridge::BridgeHandles>& bidirectional_handles, 
+  std::list<ros_ign_bridge::BridgeIgnToRosHandles>& ign_to_ros_handles,
+  std::list<ros_ign_bridge::BridgeRosToIgnHandles>& ros_to_ign_handles,
+  std::shared_ptr<ignition::transport::Node> ign_node,
+  ros::NodeHandle& ros_node) {
+
+    size_t queue_size = 10;
+
+    std::map<std::string, std::pair<std::string, std::string>> type_to_type;
+    type_to_type["bool"] = std::make_pair<std::string, std::string>("std_msgs/Bool","ignition.msgs.Boolean");
+    type_to_type["color"] = std::make_pair<std::string, std::string>("std_msgs/ColorRGBA","ignition.msgs.Color");
+    type_to_type["empty"] = std::make_pair<std::string, std::string>("std_msgs/Empty","ignition.msgs.Empty");
+    type_to_type["int32"] = std::make_pair<std::string, std::string>("std_msgs/Int32","ignition.msgs.Int32");
+    type_to_type["float32"] = std::make_pair<std::string, std::string>("std_msgs/Float32","ignition.msgs.Float");
+    type_to_type["float64"] = std::make_pair<std::string, std::string>("std_msgs/Float64","ignition.msgs.Double");
+    type_to_type["header"] = std::make_pair<std::string, std::string>("std_msgs/Header","ignition.msgs.Header");
+    type_to_type["string"] = std::make_pair<std::string, std::string>("std_msgs/String","ignition.msgs.StringMsg");
+    type_to_type["quaternion"] = std::make_pair<std::string, std::string>("geometry_msgs/Quaternion","ignition.msgs.Quaternion");
+    type_to_type["vector3"] = std::make_pair<std::string, std::string>("geometry_msgs/Vector3","ignition.msgs.Vector3d");
+    type_to_type["point"] = std::make_pair<std::string, std::string>("geometry_msgs/Point","ignition.msgs.Vector3d");
+    type_to_type["pose"] = std::make_pair<std::string, std::string>("geometry_msgs/Pose","ignition.msgs.Pose");
+    type_to_type["pose_array"] = std::make_pair<std::string, std::string>("geometry_msgs/PoseArray","ignition.msgs.Pose_V");
+    type_to_type["pose_stamped"] = std::make_pair<std::string, std::string>("geomery_msgs/PoseStamped","ignition.msgs.Pose");
+    type_to_type["transform"] = std::make_pair<std::string, std::string>("geometry_msgs/Transform","ignition.msgs.Pose");
+    type_to_type["transform_stamped"] = std::make_pair<std::string, std::string>("geometry_msgs/TransformStamped","ignition.msgs.Pose");
+    type_to_type["twist"] = std::make_pair<std::string, std::string>("geometry_msgs/Twist","ignition.msgs.Twist");
+    type_to_type["actuators"] = std::make_pair<std::string, std::string>("nav_msgs/Actuators","ignition.msgs.Actuators");
+    type_to_type["occupancy_grid"] = std::make_pair<std::string, std::string>("nav_msgs/OccupancyGrid","ignition.msgs.OccupanyGrid");
+    type_to_type["odometry"] = std::make_pair<std::string, std::string>("nav_msgs/Odometry","ignition.msgs.Odometry");
+    type_to_type["clock"] = std::make_pair<std::string, std::string>("rosgraph_msgs/Clock", "ignition.msgs.Clock");
+    type_to_type["battery_state"] = std::make_pair<std::string, std::string>("sensor_msgs/BatteryState","ignition.msgs.BatteryState");
+    type_to_type["camera_info"] = std::make_pair<std::string, std::string>("sensor_msgs/CameraInfo","ignition.msgs.CameraInfo");
+    type_to_type["fluid_pressure"] = std::make_pair<std::string, std::string>("sensor_msgs/FluidPressure","ignition.msgs.FluidPressure");
+    type_to_type["imu"] = std::make_pair<std::string, std::string>("sensor_msgs/Imu","ignition.msgs.IMU");
+    type_to_type["image"] = std::make_pair<std::string, std::string>("sensor_msgs/Image","ignition.msgs.Image");
+    type_to_type["joint_state"] = std::make_pair<std::string, std::string>("sensor_msgs/JointState","ignition.msgs.Model");
+    type_to_type["laser_scan"] = std::make_pair<std::string, std::string>("sensor_msgs/LaserScan","ignition.msgs.LaserScan");
+    type_to_type["magnetic_field"] = std::make_pair<std::string, std::string>("sensor_msgs/MagneticField","ignition.msgs.Magnetometer");
+    type_to_type["nav_sat_fix"] = std::make_pair<std::string, std::string>("sensor_msgs/NavSatFix","ignition.msgs.NavSat");
+    type_to_type["point_cloud2"] = std::make_pair<std::string, std::string>("sensor_msgs/PointCloud2","ignition.msgs.PointCloudPacked");
+    type_to_type["tf_message"] = std::make_pair<std::string, std::string>("tf_msgs/TFMessage","ignition.msgs.Pose");
+    type_to_type["marker"] = std::make_pair<std::string, std::string>("visualization_msgs/Marker","ignition.msgs.Marker");
+    type_to_type["marker_array"] = std::make_pair<std::string, std::string>("visualization_msgs/MarkerArray","ignition.msgs.Marker_V");
+    
+    XmlRpc::XmlRpcValue topics;
+    XmlRpc::XmlRpcValue frames;
+
+    if (frame_available) {
+      nh_private.getParam("frames", frames);
+
+      for (uint i = 0; i < frames.size(); i++) {
+        XmlRpc::XmlRpcValue it = frames[i];
+        std::string ign_frame;
+        std::string tf_frame;
+
+        //TODO create map + pass to bridges somehow
+
+        //pass pointer to it to all topics on creation, use on translation
+
+      }
+    } 
+
+    if (topics_available) {
+      nh_private.getParam("topics", topics);
+
+      for (uint i = 0; i < topics.size(); i++) {
+        XmlRpc::XmlRpcValue it = topics[i];
+        std::string ign_topic;
+        std::string ros_topic;
+        std::string type;
+
+        if (it.hasMember("ign_topic")) {
+          ign_topic = static_cast<std::string>(it["ign_topic"]);
+          if (!it.hasMember("ros_topic")) {
+            ROS_WARN("No ros topic given, treating ros and ign topic as the same");
+            ros_topic = ign_topic;
+          }
+        }
+        if (it.hasMember("ros_topic")) {
+          ros_topic = static_cast<std::string>(it["ros_topic"]);
+          if (!it.hasMember("ign_topic")) {
+            ROS_WARN("No ign topic given, treating ros and ign topic as the same");
+            ign_topic = ros_topic;
+          }
+        }
+
+        if (!it.hasMember("ros_topic") && !it.hasMember("ign_topic")) {
+          ROS_ERROR("No topic given in current config entry, skipping");
+          continue;
+        }
+
+        if (!it.hasMember("type")) {
+          ROS_ERROR("No topic type given, unable to bridge this topic");
+          continue;
+        }
+        type = static_cast<std::string>(it["type"]);
+
+        std::string ros_type = type_to_type[type].first;
+        std::string ign_type = type_to_type[type].second;
+
+        std::cout << "creaating bridge for" << ros_topic << std::endl;
+        try
+        {
+          if (it.hasMember("direction")) {
+            if (static_cast<std::string>(it["direction"]) == "to_ros") {
+              ign_to_ros_handles.push_back(
+              ros_ign_bridge::create_bridge_from_ign_to_ros(
+                ign_node, ros_node,
+                ign_type, ign_topic, queue_size,
+                ros_type, ros_topic, queue_size));
+            std::cout << "created bridge to ros" << std::endl;
+                continue;
+            }
+            if (static_cast<std::string>(it["direction"]) == "to_ign") {
+              ros_to_ign_handles.push_back(
+                ros_ign_bridge::create_bridge_from_ros_to_ign(
+                  ros_node, ign_node,
+                  ros_type, ros_topic, queue_size,
+                  ign_type, ign_topic, queue_size));
+            std::cout << "created bridge to ign" << std::endl;
+                  continue;
+            }
+            else {
+              bidirectional_handles.push_back(
+                ros_ign_bridge::create_bidirectional_bridge(
+                  ros_node, ign_node,
+                  ros_type, ign_type,
+                  ros_topic, ign_topic, queue_size));
+            std::cout << "created bridge bidirectional" << std::endl;
+                  continue;
+            }
+          }
+          else {
+            ROS_WARN("No direction given, assuming bidirectional");
+            bidirectional_handles.push_back(
+                ros_ign_bridge::create_bidirectional_bridge(
+                  ros_node, ign_node,
+                  ros_type, ign_type,
+                  ros_topic, ign_topic, queue_size));
+            std::cout << "created bridge bidirectional" << std::endl;
+                  continue;
+          }
+        } catch (std::runtime_error &_e) {
+          ROS_ERROR_STREAM("Failed to create a bridge for topics ["
+            << ros_topic << " " << ign_topic << "] "
+            << "with ROS type [" << ros_type << "] and "
+            << "Ignition Transport type [" << ign_type << "]"
+            << std::endl);
+        }
+      }
+    }
+    return 0;
+  }
+//////////////////////////////////////////////////
+int main(int argc, char * argv[])
+{
+  // ROS node
+  ros::init(argc, argv, "ros_ign_bridge");
+  ros::NodeHandle ros_node;
+  ros::NodeHandle nh_private("~");
+
+
+  bool topics_available = false;
+  bool frames_available = false;
+  topics_available = nh_private.hasParam("topics");
+  frames_available = nh_private.hasParam("frames");
+
+  if (argc < 2 && !(topics_available))
+  {
+    usage();
+    return -1;
+  } 
+ 
+
+  // Ignition node
+  auto ign_node = std::make_shared<ignition::transport::Node>();
+
+  std::list<ros_ign_bridge::BridgeHandles> bidirectional_handles;
+  std::list<ros_ign_bridge::BridgeIgnToRosHandles> ign_to_ros_handles;
+  std::list<ros_ign_bridge::BridgeRosToIgnHandles> ros_to_ign_handles;
+
+  if (argc > 2) {
+    int res = parseArguments(argc, argv, bidirectional_handles, ign_to_ros_handles, ros_to_ign_handles, ign_node, ros_node);
+    if (res != 0)
+      return res;
+  }
+  
+  if (topics_available || frames_available) {
+    int res = parseParameters(topics_available, frames_available, nh_private, bidirectional_handles, ign_to_ros_handles, ros_to_ign_handles, ign_node, ros_node);
+    if (res != 0) 
+      return res;
+  }
+
 
   // ROS asynchronous spinner
   ros::AsyncSpinner async_spinner(1);

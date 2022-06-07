@@ -59,7 +59,7 @@ std::string frame_id_ign_to_ros(const std::string &frame_id)
   std::string frame = frame_id;
   std::string delimiter = "::";
   while(std::count(frame.begin(), frame.end(), delimiter.c_str()[0]) > 0) {
-    std::cout << "removing delimiter" << std::endl;
+    //std::cout << "removing delimiter" << std::endl;
     frame.erase(0, frame.find(delimiter) + delimiter.length()); 
   }
   std::string robot_prefix = ""; //TODO
