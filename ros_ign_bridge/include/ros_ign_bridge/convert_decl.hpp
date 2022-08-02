@@ -22,13 +22,15 @@ template<typename ROS_T, typename IGN_T>
 void
 convert_ros_to_ign(
   const ROS_T & ros_msg,
-  IGN_T & ign_msg);
+  IGN_T & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<typename ROS_T, typename IGN_T>
 void
 convert_ign_to_ros(
   const IGN_T & ign_msg,
-  ROS_T & ros_msg);
+  ROS_T & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 }  // namespace ros_ign_bridge
 

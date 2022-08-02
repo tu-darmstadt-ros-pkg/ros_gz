@@ -27,6 +27,8 @@
 
 #include "factories.hpp"
 
+#include "ros_ign_bridge/global_frame_translation.hpp"
+
 namespace ros_ign_bridge
 {
 
@@ -57,9 +59,11 @@ create_bridge_from_ros_to_ign(
   size_t subscriber_queue_size,
   const std::string & ign_type_name,
   const std::string & ign_topic_name,
-  size_t publisher_queue_size)
+  size_t publisher_queue_size,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign, 
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf)
 {
-  auto factory = get_factory(ros_type_name, ign_type_name);
+  auto factory = get_factory(ros_type_name, ign_type_name, tf_to_ign, ign_to_tf);
   auto ign_pub = factory->create_ign_publisher(
     ign_node, ign_topic_name, publisher_queue_size);
 
@@ -81,9 +85,11 @@ create_bridge_from_ign_to_ros(
   size_t subscriber_queue_size,
   const std::string & ros_type_name,
   const std::string & ros_topic_name,
-  size_t publisher_queue_size)
+  size_t publisher_queue_size,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign, 
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf)
 {
-  auto factory = get_factory(ros_type_name, ign_type_name);
+  auto factory = get_factory(ros_type_name, ign_type_name, tf_to_ign, ign_to_tf);
   auto ros_pub = factory->create_ros_publisher(
     ros_node, ros_topic_name, publisher_queue_size);
 
@@ -104,6 +110,8 @@ create_bidirectional_bridge(
   const std::string & ign_type_name,
   const std::string & ros_topic_name,
   const std::string & ign_topic_name,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign, 
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf,
   size_t queue_size = 10)
 {
   ROS_DEBUG_STREAM("Creating bidirectional bridge for topics " << ros_topic_name << " " << ign_topic_name
@@ -113,10 +121,10 @@ create_bidirectional_bridge(
   BridgeHandles handles;
   handles.bridgeRosToIgn = create_bridge_from_ros_to_ign(
    ros_node, ign_node,
-   ros_type_name, ros_topic_name, queue_size, ign_type_name, ign_topic_name, queue_size);
+   ros_type_name, ros_topic_name, queue_size, ign_type_name, ign_topic_name, queue_size, tf_to_ign, ign_to_tf);
   handles.bridgeIgnToRos = create_bridge_from_ign_to_ros(
     ign_node, ros_node,
-    ign_type_name, ign_topic_name, queue_size, ros_type_name, ros_topic_name, queue_size);
+    ign_type_name, ign_topic_name, queue_size, ros_type_name, ros_topic_name, queue_size, tf_to_ign, ign_to_tf);
   return handles;
 }
 

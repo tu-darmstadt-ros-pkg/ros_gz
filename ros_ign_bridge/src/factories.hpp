@@ -62,7 +62,9 @@ namespace ros_ign_bridge
 {
 std::shared_ptr<FactoryInterface>
 get_factory(const std::string & ros_type_name,
-            const std::string & ign_type_name);
+            const std::string & ign_type_name,
+            std::shared_ptr<std::map<std::string, std::string>> tf_to_ign, 
+            std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 // conversion functions for available interfaces
 
@@ -74,7 +76,8 @@ Factory<
   ignition::msgs::Boolean
 >::convert_ros_to_ign(
   const std_msgs::Bool & ros_msg,
-  ignition::msgs::Boolean & ign_msg);
+  ignition::msgs::Boolean & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -83,7 +86,8 @@ Factory<
   ignition::msgs::Boolean
 >::convert_ign_to_ros(
   const ignition::msgs::Boolean & ign_msg,
-  std_msgs::Bool & ros_msg);
+  std_msgs::Bool & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -92,7 +96,8 @@ Factory<
   ignition::msgs::Color
 >::convert_ros_to_ign(
   const std_msgs::ColorRGBA & ros_msg,
-  ignition::msgs::Color & ign_msg);
+  ignition::msgs::Color & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -101,7 +106,8 @@ Factory<
   ignition::msgs::Color
 >::convert_ign_to_ros(
   const ignition::msgs::Color & ign_msg,
-  std_msgs::ColorRGBA & ros_msg);
+  std_msgs::ColorRGBA & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -110,7 +116,8 @@ Factory<
   ignition::msgs::Empty
 >::convert_ros_to_ign(
   const std_msgs::Empty & ros_msg,
-  ignition::msgs::Empty & ign_msg);
+  ignition::msgs::Empty & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -119,7 +126,8 @@ Factory<
   ignition::msgs::Empty
 >::convert_ign_to_ros(
   const ignition::msgs::Empty & ign_msg,
-  std_msgs::Empty & ros_msg);
+  std_msgs::Empty & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -128,7 +136,8 @@ Factory<
   ignition::msgs::Int32
 >::convert_ros_to_ign(
   const std_msgs::Int32 & ros_msg,
-  ignition::msgs::Int32 & ign_msg);
+  ignition::msgs::Int32 & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -137,7 +146,8 @@ Factory<
   ignition::msgs::Int32
 >::convert_ign_to_ros(
   const ignition::msgs::Int32 & ign_msg,
-  std_msgs::Int32 & ros_msg);
+  std_msgs::Int32 & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -146,7 +156,8 @@ Factory<
   ignition::msgs::Float
 >::convert_ros_to_ign(
   const std_msgs::Float32 & ros_msg,
-  ignition::msgs::Float & ign_msg);
+  ignition::msgs::Float & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -155,7 +166,8 @@ Factory<
   ignition::msgs::Float
 >::convert_ign_to_ros(
   const ignition::msgs::Float & ign_msg,
-  std_msgs::Float32 & ros_msg);
+  std_msgs::Float32 & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -164,7 +176,8 @@ Factory<
   ignition::msgs::Double
 >::convert_ros_to_ign(
   const std_msgs::Float64 & ros_msg,
-  ignition::msgs::Double & ign_msg);
+  ignition::msgs::Double & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -173,7 +186,8 @@ Factory<
   ignition::msgs::Double
 >::convert_ign_to_ros(
   const ignition::msgs::Double & ign_msg,
-  std_msgs::Float64 & ros_msg);
+  std_msgs::Float64 & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -182,7 +196,8 @@ Factory<
   ignition::msgs::Header
 >::convert_ros_to_ign(
   const std_msgs::Header & ros_msg,
-  ignition::msgs::Header & ign_msg);
+  ignition::msgs::Header & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -191,7 +206,8 @@ Factory<
   ignition::msgs::Header
 >::convert_ign_to_ros(
   const ignition::msgs::Header & ign_msg,
-  std_msgs::Header & ros_msg);
+  std_msgs::Header & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -200,7 +216,8 @@ Factory<
   ignition::msgs::StringMsg
 >::convert_ros_to_ign(
   const std_msgs::String & ros_msg,
-  ignition::msgs::StringMsg & ign_msg);
+  ignition::msgs::StringMsg & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -209,7 +226,8 @@ Factory<
   ignition::msgs::StringMsg
 >::convert_ign_to_ros(
   const ignition::msgs::StringMsg & ign_msg,
-  std_msgs::String & ros_msg);
+  std_msgs::String & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 // rosgraph_msgs
 template<>
@@ -219,7 +237,8 @@ Factory<
   ignition::msgs::Clock
 >::convert_ros_to_ign(
   const rosgraph_msgs::Clock & ros_msg,
-  ignition::msgs::Clock & ign_msg);
+  ignition::msgs::Clock & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -228,7 +247,8 @@ Factory<
   ignition::msgs::Clock
 >::convert_ign_to_ros(
   const ignition::msgs::Clock & ign_msg,
-  rosgraph_msgs::Clock & ros_msg);
+  rosgraph_msgs::Clock & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 // geometry_msgs
 template<>
@@ -238,7 +258,8 @@ Factory<
   ignition::msgs::Quaternion
 >::convert_ros_to_ign(
   const geometry_msgs::Quaternion & ros_msg,
-  ignition::msgs::Quaternion & ign_msg);
+  ignition::msgs::Quaternion & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -247,7 +268,8 @@ Factory<
   ignition::msgs::Quaternion
 >::convert_ign_to_ros(
   const ignition::msgs::Quaternion & ign_msg,
-  geometry_msgs::Quaternion & ros_msg);
+  geometry_msgs::Quaternion & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -256,7 +278,8 @@ Factory<
   ignition::msgs::Vector3d
 >::convert_ros_to_ign(
   const geometry_msgs::Vector3 & ros_msg,
-  ignition::msgs::Vector3d & ign_msg);
+  ignition::msgs::Vector3d & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -265,7 +288,8 @@ Factory<
   ignition::msgs::Vector3d
 >::convert_ign_to_ros(
   const ignition::msgs::Vector3d & ign_msg,
-  geometry_msgs::Vector3 & ros_msg);
+  geometry_msgs::Vector3 & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -274,7 +298,8 @@ Factory<
   ignition::msgs::Vector3d
 >::convert_ros_to_ign(
   const geometry_msgs::Point & ros_msg,
-  ignition::msgs::Vector3d & ign_msg);
+  ignition::msgs::Vector3d & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -283,7 +308,8 @@ Factory<
   ignition::msgs::Vector3d
 >::convert_ign_to_ros(
   const ignition::msgs::Vector3d & ign_msg,
-  geometry_msgs::Point & ros_msg);
+  geometry_msgs::Point & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -292,7 +318,8 @@ Factory<
   ignition::msgs::Pose
 >::convert_ros_to_ign(
   const geometry_msgs::Pose & ros_msg,
-  ignition::msgs::Pose & ign_msg);
+  ignition::msgs::Pose & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -301,7 +328,8 @@ Factory<
   ignition::msgs::Pose
 >::convert_ign_to_ros(
   const ignition::msgs::Pose & ign_msg,
-  geometry_msgs::Pose & ros_msg);
+  geometry_msgs::Pose & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -310,7 +338,8 @@ Factory<
   ignition::msgs::Pose_V
 >::convert_ros_to_ign(
   const geometry_msgs::PoseArray & ros_msg,
-  ignition::msgs::Pose_V & ign_msg);
+  ignition::msgs::Pose_V & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -319,7 +348,8 @@ Factory<
   ignition::msgs::Pose_V
 >::convert_ign_to_ros(
   const ignition::msgs::Pose_V & ign_msg,
-  geometry_msgs::PoseArray & ros_msg);
+  geometry_msgs::PoseArray & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -328,7 +358,8 @@ Factory<
   ignition::msgs::Pose
 >::convert_ros_to_ign(
   const geometry_msgs::PoseStamped & ros_msg,
-  ignition::msgs::Pose & ign_msg);
+  ignition::msgs::Pose & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -337,7 +368,8 @@ Factory<
   ignition::msgs::Pose
 >::convert_ign_to_ros(
   const ignition::msgs::Pose & ign_msg,
-  geometry_msgs::PoseStamped & ros_msg);
+  geometry_msgs::PoseStamped & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -346,7 +378,8 @@ Factory<
   ignition::msgs::Pose
 >::convert_ros_to_ign(
   const geometry_msgs::Transform & ros_msg,
-  ignition::msgs::Pose & ign_msg);
+  ignition::msgs::Pose & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -355,7 +388,8 @@ Factory<
   ignition::msgs::Pose
 >::convert_ign_to_ros(
   const ignition::msgs::Pose & ign_msg,
-  geometry_msgs::Transform & ros_msg);
+  geometry_msgs::Transform & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -364,7 +398,8 @@ Factory<
   ignition::msgs::Pose
 >::convert_ros_to_ign(
   const geometry_msgs::TransformStamped & ros_msg,
-  ignition::msgs::Pose & ign_msg);
+  ignition::msgs::Pose & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -373,7 +408,8 @@ Factory<
   ignition::msgs::Pose
 >::convert_ign_to_ros(
   const ignition::msgs::Pose & ign_msg,
-  geometry_msgs::TransformStamped & ros_msg);
+  geometry_msgs::TransformStamped & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -382,7 +418,8 @@ Factory<
   ignition::msgs::Pose_V
 >::convert_ros_to_ign(
   const tf2_msgs::TFMessage & ros_msg,
-  ignition::msgs::Pose_V & ign_msg);
+  ignition::msgs::Pose_V & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -391,7 +428,8 @@ Factory<
   ignition::msgs::Pose_V
 >::convert_ign_to_ros(
   const ignition::msgs::Pose_V & ign_msg,
-  tf2_msgs::TFMessage & ros_msg);
+  tf2_msgs::TFMessage & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -400,7 +438,8 @@ Factory<
   ignition::msgs::Twist
 >::convert_ros_to_ign(
   const geometry_msgs::Twist & ros_msg,
-  ignition::msgs::Twist & ign_msg);
+  ignition::msgs::Twist & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -409,7 +448,8 @@ Factory<
   ignition::msgs::Twist
 >::convert_ign_to_ros(
   const ignition::msgs::Twist & ign_msg,
-  geometry_msgs::Twist & ros_msg);
+  geometry_msgs::Twist & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 // mav_msgs
 // template<>
@@ -419,7 +459,8 @@ Factory<
 //   ignition::msgs::Actuators
 // >::convert_ros_to_ign(
 //   const mav_msgs::Actuators & ros_msg,
-//   ignition::msgs::Actuators & ign_msg);
+//   ignition::msgs::Actuators & ign_msg,
+//  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 //
 // template<>
 // void
@@ -428,7 +469,8 @@ Factory<
 //   ignition::msgs::Actuators
 // >::convert_ign_to_ros(
 //   const ignition::msgs::Actuators & ign_msg,
-//   mav_msgs::Actuators & ros_msg);
+//   mav_msgs::Actuators & ros_msg,
+//  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 // nav_msgs
 template<>
@@ -438,7 +480,8 @@ Factory<
   ignition::msgs::OccupancyGrid
 >::convert_ros_to_ign(
   const nav_msgs::OccupancyGrid & ros_msg,
-  ignition::msgs::OccupancyGrid & ign_msg);
+  ignition::msgs::OccupancyGrid & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -447,7 +490,8 @@ Factory<
   ignition::msgs::OccupancyGrid
 >::convert_ign_to_ros(
   const ignition::msgs::OccupancyGrid & ign_msg,
-  nav_msgs::OccupancyGrid & ros_msg);
+  nav_msgs::OccupancyGrid & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -456,7 +500,8 @@ Factory<
   ignition::msgs::Odometry
 >::convert_ros_to_ign(
   const nav_msgs::Odometry & ros_msg,
-  ignition::msgs::Odometry & ign_msg);
+  ignition::msgs::Odometry & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -465,7 +510,8 @@ Factory<
   ignition::msgs::Odometry
 >::convert_ign_to_ros(
   const ignition::msgs::Odometry & ign_msg,
-  nav_msgs::Odometry & ros_msg);
+  nav_msgs::Odometry & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 // sensor_msgs
 template<>
@@ -475,7 +521,8 @@ Factory<
   ignition::msgs::FluidPressure
 >::convert_ros_to_ign(
   const sensor_msgs::FluidPressure & ros_msg,
-  ignition::msgs::FluidPressure & ign_msg);
+  ignition::msgs::FluidPressure & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -484,7 +531,8 @@ Factory<
   ignition::msgs::FluidPressure
 >::convert_ign_to_ros(
   const ignition::msgs::FluidPressure & ign_msg,
-  sensor_msgs::FluidPressure & ros_msg);
+  sensor_msgs::FluidPressure & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -493,7 +541,8 @@ Factory<
   ignition::msgs::Image
 >::convert_ros_to_ign(
   const sensor_msgs::Image & ros_msg,
-  ignition::msgs::Image & ign_msg);
+  ignition::msgs::Image & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -502,7 +551,8 @@ Factory<
   ignition::msgs::Image
 >::convert_ign_to_ros(
   const ignition::msgs::Image & ign_msg,
-  sensor_msgs::Image & ros_msg);
+  sensor_msgs::Image & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -511,7 +561,8 @@ Factory<
   ignition::msgs::CameraInfo
 >::convert_ros_to_ign(
   const sensor_msgs::CameraInfo & ros_msg,
-  ignition::msgs::CameraInfo & ign_msg);
+  ignition::msgs::CameraInfo & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -520,7 +571,8 @@ Factory<
   ignition::msgs::CameraInfo
 >::convert_ign_to_ros(
   const ignition::msgs::CameraInfo & ign_msg,
-  sensor_msgs::CameraInfo & ros_msg);
+  sensor_msgs::CameraInfo & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -529,7 +581,8 @@ Factory<
   ignition::msgs::IMU
 >::convert_ros_to_ign(
   const sensor_msgs::Imu & ros_msg,
-  ignition::msgs::IMU & ign_msg);
+  ignition::msgs::IMU & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -538,7 +591,8 @@ Factory<
   ignition::msgs::IMU
 >::convert_ign_to_ros(
   const ignition::msgs::IMU & ign_msg,
-  sensor_msgs::Imu & ros_msg);
+  sensor_msgs::Imu & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -547,7 +601,8 @@ Factory<
   ignition::msgs::Model
 >::convert_ros_to_ign(
   const sensor_msgs::JointState & ros_msg,
-  ignition::msgs::Model & ign_msg);
+  ignition::msgs::Model & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -556,7 +611,8 @@ Factory<
   ignition::msgs::Model
 >::convert_ign_to_ros(
   const ignition::msgs::Model & ign_msg,
-  sensor_msgs::JointState & ros_msg);
+  sensor_msgs::JointState & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -565,7 +621,8 @@ Factory<
   ignition::msgs::LaserScan
 >::convert_ros_to_ign(
   const sensor_msgs::LaserScan & ros_msg,
-  ignition::msgs::LaserScan & ign_msg);
+  ignition::msgs::LaserScan & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -574,7 +631,8 @@ Factory<
   ignition::msgs::LaserScan
 >::convert_ign_to_ros(
   const ignition::msgs::LaserScan & ign_msg,
-  sensor_msgs::LaserScan & ros_msg);
+  sensor_msgs::LaserScan & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -583,7 +641,8 @@ Factory<
   ignition::msgs::Magnetometer
 >::convert_ros_to_ign(
   const sensor_msgs::MagneticField & ros_msg,
-  ignition::msgs::Magnetometer & ign_msg);
+  ignition::msgs::Magnetometer & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -592,7 +651,8 @@ Factory<
   ignition::msgs::Magnetometer
 >::convert_ign_to_ros(
   const ignition::msgs::Magnetometer & ign_msg,
-  sensor_msgs::MagneticField & ros_msg);
+  sensor_msgs::MagneticField & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -601,7 +661,8 @@ Factory<
   ignition::msgs::PointCloudPacked
 >::convert_ros_to_ign(
   const sensor_msgs::PointCloud2 & ros_msg,
-  ignition::msgs::PointCloudPacked & ign_msg);
+  ignition::msgs::PointCloudPacked & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -610,7 +671,8 @@ Factory<
   ignition::msgs::PointCloudPacked
 >::convert_ign_to_ros(
   const ignition::msgs::PointCloudPacked & ign_msg,
-  sensor_msgs::PointCloud2 & ros_msg);
+  sensor_msgs::PointCloud2 & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -619,7 +681,8 @@ Factory<
   ignition::msgs::BatteryState
 >::convert_ros_to_ign(
   const sensor_msgs::BatteryState & ros_msg,
-  ignition::msgs::BatteryState & ign_msg);
+  ignition::msgs::BatteryState & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -628,7 +691,8 @@ Factory<
   ignition::msgs::BatteryState
 >::convert_ign_to_ros(
   const ignition::msgs::BatteryState & ign_msg,
-  sensor_msgs::BatteryState & ros_msg);
+  sensor_msgs::BatteryState & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -637,7 +701,8 @@ Factory<
   ignition::msgs::Marker
 >::convert_ros_to_ign(
     const visualization_msgs::Marker & ros_msg,
-    ignition::msgs::Marker & ign_msg);
+    ignition::msgs::Marker & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -646,7 +711,8 @@ Factory<
   ignition::msgs::Marker
 >::convert_ign_to_ros(
     const ignition::msgs::Marker & ign_msg,
-    visualization_msgs::Marker & ros_msg);
+    visualization_msgs::Marker & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 template<>
 void
@@ -655,7 +721,8 @@ Factory<
   ignition::msgs::Marker_V
 >::convert_ros_to_ign(
     const visualization_msgs::MarkerArray & ros_msg,
-    ignition::msgs::Marker_V & ign_msg);
+    ignition::msgs::Marker_V & ign_msg,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
 
 template<>
 void
@@ -664,7 +731,8 @@ Factory<
   ignition::msgs::Marker_V
 >::convert_ign_to_ros(
     const ignition::msgs::Marker_V & ign_msg,
-    visualization_msgs::MarkerArray & ros_msg);
+    visualization_msgs::MarkerArray & ros_msg,
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
 }  // namespace ros_ign_bridge
 

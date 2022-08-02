@@ -36,9 +36,11 @@ class Factory : public FactoryInterface
 {
 public:
   Factory(
-    const std::string & ros_type_name, const std::string & ign_type_name)
+    const std::string & ros_type_name, const std::string & ign_type_name, std::shared_ptr<std::map<std::string, std::string>> tf_to_ign, std::shared_ptr<std::map<std::string, std::string>> ign_to_tf)
   : ros_type_name_(ros_type_name),
-    ign_type_name_(ign_type_name)
+    ign_type_name_(ign_type_name),
+    tf_to_ign_(tf_to_ign),
+    ign_to_tf_(ign_to_tf)
   {}
 
   ros::Publisher
@@ -76,9 +78,9 @@ public:
     ops.helper = ros::SubscriptionCallbackHelperPtr(
       new ros::SubscriptionCallbackHelperT
         <const ros::MessageEvent<ROS_T const> &>(
-          boost::bind(
+          boost::bind(//TODO bind map here as well, because static
             &Factory<ROS_T, IGN_T>::ros_callback,
-            _1, ign_pub, ros_type_name_, ign_type_name_)));
+            _1, ign_pub, ros_type_name_, ign_type_name_, tf_to_ign_)));
     return node.subscribe(ops);
   }
 
@@ -97,7 +99,7 @@ public:
     {
       // Ignore messages that are published from this bridge.
       if (!_info.IntraProcess())
-        this->ign_callback(_msg, ros_pub);
+        this->ign_callback(_msg, ros_pub, ign_to_tf_);
     };
 
     node->Subscribe(topic_name, subCb);
@@ -110,7 +112,8 @@ protected:
     const ros::MessageEvent<ROS_T const> & ros_msg_event,
     ignition::transport::Node::Publisher & ign_pub,
     const std::string &ros_type_name,
-    const std::string &ign_type_name)
+    const std::string &ign_type_name,
+    const std::shared_ptr<std::map<std::string, std::string>> tf_to_ign)
   {
     const boost::shared_ptr<ros::M_string> & connection_header =
       ros_msg_event.getConnectionHeaderPtr();
@@ -131,7 +134,7 @@ protected:
       ros_msg_event.getConstMessage();
 
     IGN_T ign_msg;
-    convert_ros_to_ign(*ros_msg, ign_msg);
+    convert_ros_to_ign(*ros_msg, ign_msg, tf_to_ign);
     ign_pub.Publish(ign_msg);
     ROS_INFO_ONCE("Passing message from ROS %s to Ignition %s (showing msg"\
         " only once per type)", ros_type_name.c_str(), ign_type_name.c_str());
@@ -140,10 +143,11 @@ protected:
   static
   void ign_callback(
     const IGN_T & ign_msg,
-    ros::Publisher ros_pub)
+    ros::Publisher ros_pub,
+    std::shared_ptr<std::map<std::string, std::string>> ign_to_tf)
   {
     ROS_T ros_msg;
-    convert_ign_to_ros(ign_msg, ros_msg);
+    convert_ign_to_ros(ign_msg, ros_msg, ign_to_tf);
     ros_pub.publish(ros_msg);
   }
 
@@ -154,15 +158,19 @@ public:
   void
   convert_ros_to_ign(
     const ROS_T & ros_msg,
-    IGN_T & ign_msg);
+    IGN_T & ign_msg,
+    std::shared_ptr<std::map<std::string, std::string>> tf_to_ign);
   static
   void
   convert_ign_to_ros(
     const IGN_T & ign_msg,
-    ROS_T & ros_msg);
+    ROS_T & ros_msg,
+    std::shared_ptr<std::map<std::string, std::string>> ign_to_tf);
 
   std::string ros_type_name_;
   std::string ign_type_name_;
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign_;
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf_;
 };
 
 }  // namespace ros_ign_bridge

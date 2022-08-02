@@ -75,7 +75,9 @@ int parseArguments(int argc, char * argv[],
   std::list<ros_ign_bridge::BridgeIgnToRosHandles>& ign_to_ros_handles,
   std::list<ros_ign_bridge::BridgeRosToIgnHandles>& ros_to_ign_handles,
   std::shared_ptr<ignition::transport::Node> ign_node,
-  ros::NodeHandle& ros_node) {
+  ros::NodeHandle& ros_node,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign, 
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf) {
 // Parse all arguments.
   const std::string delim = "@";
   const std::string delim2 = "[";
@@ -169,21 +171,25 @@ int parseArguments(int argc, char * argv[],
               ros_ign_bridge::create_bidirectional_bridge(
                 ros_node, ign_node,
                 ros_type_name, ign_type_name,
-                ros_topic, ign_topic, queue_size));
+                ros_topic, ign_topic,
+                tf_to_ign, ign_to_tf, 
+                queue_size));
           break;
         case FROM_IGN_TO_ROS:
           ign_to_ros_handles.push_back(
               ros_ign_bridge::create_bridge_from_ign_to_ros(
                 ign_node, ros_node,
                 ign_type_name, ign_topic, queue_size,
-                ros_type_name, ros_topic, queue_size));
+                ros_type_name, ros_topic, queue_size,
+                tf_to_ign, ign_to_tf));
           break;
         case FROM_ROS_TO_IGN:
           ros_to_ign_handles.push_back(
               ros_ign_bridge::create_bridge_from_ros_to_ign(
                 ros_node, ign_node,
                 ros_type_name, ros_topic, queue_size,
-                ign_type_name, ign_topic, queue_size));
+                ign_type_name, ign_topic, queue_size,
+                tf_to_ign, ign_to_tf));
           break;
       }
     }
@@ -205,7 +211,9 @@ int parseParameters(bool topics_available, bool frame_available,
   std::list<ros_ign_bridge::BridgeIgnToRosHandles>& ign_to_ros_handles,
   std::list<ros_ign_bridge::BridgeRosToIgnHandles>& ros_to_ign_handles,
   std::shared_ptr<ignition::transport::Node> ign_node,
-  ros::NodeHandle& ros_node) {
+  ros::NodeHandle& ros_node,
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign, 
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf) {
 
     size_t queue_size = 10;
 
@@ -244,7 +252,7 @@ int parseParameters(bool topics_available, bool frame_available,
     type_to_type["tf_message"] = std::make_pair<std::string, std::string>("tf_msgs/TFMessage","ignition.msgs.Pose");
     type_to_type["marker"] = std::make_pair<std::string, std::string>("visualization_msgs/Marker","ignition.msgs.Marker");
     type_to_type["marker_array"] = std::make_pair<std::string, std::string>("visualization_msgs/MarkerArray","ignition.msgs.Marker_V");
-    
+
     XmlRpc::XmlRpcValue topics;
     XmlRpc::XmlRpcValue frames;
 
@@ -256,9 +264,21 @@ int parseParameters(bool topics_available, bool frame_available,
         std::string ign_frame;
         std::string tf_frame;
 
-        //TODO create map + pass to bridges somehow
+        if (!it.hasMember("ign_frame")) {
+          ROS_ERROR("Missing ign frame, skipping");
+          continue;
+        }
+        if (!it.hasMember("tf_frame")) {
+          ROS_ERROR("Missing ign frame, skipping");
+          continue;
+        }
+        ign_frame = static_cast<std::string>(it["ign_frame"]);
+        tf_frame = static_cast<std::string>(it["tf_frame"]);
 
-        //pass pointer to it to all topics on creation, use on translation
+        (*tf_to_ign)[tf_frame] = ign_frame;
+        (*ign_to_tf)[ign_frame] = tf_frame;
+
+        //TODO use for translation
 
       }
     } 
@@ -301,7 +321,7 @@ int parseParameters(bool topics_available, bool frame_available,
         std::string ros_type = type_to_type[type].first;
         std::string ign_type = type_to_type[type].second;
 
-        std::cout << "creaating bridge for" << ros_topic << std::endl;
+        std::cout << "creating bridge for " << ros_topic << std::endl;
         try
         {
           if (it.hasMember("direction")) {
@@ -310,7 +330,8 @@ int parseParameters(bool topics_available, bool frame_available,
               ros_ign_bridge::create_bridge_from_ign_to_ros(
                 ign_node, ros_node,
                 ign_type, ign_topic, queue_size,
-                ros_type, ros_topic, queue_size));
+                ros_type, ros_topic, queue_size,
+                tf_to_ign, ign_to_tf));
             std::cout << "created bridge to ros" << std::endl;
                 continue;
             }
@@ -319,7 +340,8 @@ int parseParameters(bool topics_available, bool frame_available,
                 ros_ign_bridge::create_bridge_from_ros_to_ign(
                   ros_node, ign_node,
                   ros_type, ros_topic, queue_size,
-                  ign_type, ign_topic, queue_size));
+                  ign_type, ign_topic, queue_size,
+                  tf_to_ign, ign_to_tf));
             std::cout << "created bridge to ign" << std::endl;
                   continue;
             }
@@ -328,7 +350,8 @@ int parseParameters(bool topics_available, bool frame_available,
                 ros_ign_bridge::create_bidirectional_bridge(
                   ros_node, ign_node,
                   ros_type, ign_type,
-                  ros_topic, ign_topic, queue_size));
+                  ros_topic, ign_topic, 
+                  tf_to_ign, ign_to_tf, queue_size));
             std::cout << "created bridge bidirectional" << std::endl;
                   continue;
             }
@@ -339,7 +362,8 @@ int parseParameters(bool topics_available, bool frame_available,
                 ros_ign_bridge::create_bidirectional_bridge(
                   ros_node, ign_node,
                   ros_type, ign_type,
-                  ros_topic, ign_topic, queue_size));
+                  ros_topic, ign_topic, 
+                  tf_to_ign, ign_to_tf, queue_size));
             std::cout << "created bridge bidirectional" << std::endl;
                   continue;
           }
@@ -362,7 +386,6 @@ int main(int argc, char * argv[])
   ros::NodeHandle ros_node;
   ros::NodeHandle nh_private("~");
 
-
   bool topics_available = false;
   bool frames_available = false;
   topics_available = nh_private.hasParam("topics");
@@ -374,7 +397,6 @@ int main(int argc, char * argv[])
     return -1;
   } 
  
-
   // Ignition node
   auto ign_node = std::make_shared<ignition::transport::Node>();
 
@@ -382,14 +404,19 @@ int main(int argc, char * argv[])
   std::list<ros_ign_bridge::BridgeIgnToRosHandles> ign_to_ros_handles;
   std::list<ros_ign_bridge::BridgeRosToIgnHandles> ros_to_ign_handles;
 
+  std::shared_ptr<std::map<std::string, std::string>> tf_to_ign = std::make_shared<std::map<std::string, std::string>>();
+  std::shared_ptr<std::map<std::string, std::string>> ign_to_tf = std::make_shared<std::map<std::string, std::string>>();
+
+
+
   if (argc > 2) {
-    int res = parseArguments(argc, argv, bidirectional_handles, ign_to_ros_handles, ros_to_ign_handles, ign_node, ros_node);
+    int res = parseArguments(argc, argv, bidirectional_handles, ign_to_ros_handles, ros_to_ign_handles, ign_node, ros_node, tf_to_ign, ign_to_tf);
     if (res != 0)
       return res;
   }
   
   if (topics_available || frames_available) {
-    int res = parseParameters(topics_available, frames_available, nh_private, bidirectional_handles, ign_to_ros_handles, ros_to_ign_handles, ign_node, ros_node);
+    int res = parseParameters(topics_available, frames_available, nh_private, bidirectional_handles, ign_to_ros_handles, ros_to_ign_handles, ign_node, ros_node, tf_to_ign, ign_to_tf);
     if (res != 0) 
       return res;
   }
